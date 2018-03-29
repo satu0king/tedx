@@ -22,7 +22,7 @@ class AdminController < ApplicationController
 
 	def timeout
 		res = ""
-		File.open("public/state.txt").each do |line|
+		File.open("./public/state.txt").each do |line|
 			res += line
 		end
 		render plain: res
@@ -32,13 +32,13 @@ class AdminController < ApplicationController
 
 	def changeState(state)
 		res = ""
-		File.open("public/state.txt").each do |line|
+		File.open("./public/state.txt").each do |line|
 			res += line
 		end
 
 		res = res.to_i
 		res = (res/4 + 1)*4 + state
-		File.open("public/state.txt","w") do |line|
+		File.open("./public/state.txt","w") do |line|
 			line.puts res
 		end
 	end
