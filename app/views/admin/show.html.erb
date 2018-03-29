@@ -1,0 +1,44 @@
+<button type="button" id="start">Start</button>
+<button type="button" id="reset">Reset</button>
+<button type="button" id="pause">Pause</button>
+<button type="button" id="resume">Resume</button>
+
+<script>
+
+function httpGetAsync(theUrl, callback) {
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.onreadystatechange = function() {
+		if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+			callback(xmlHttp.responseText);
+	}
+	xmlHttp.open("GET", theUrl + '?_=' + new Date().getTime(), true); // true for asynchronous
+	xmlHttp.setRequestHeader('cache-control', 'no-cache, must-revalidate, post-check=0, pre-check=0');
+	xmlHttp.setRequestHeader('cache-control', 'max-age=0');
+	xmlHttp.setRequestHeader('expires', '0');
+	xmlHttp.setRequestHeader('expires', 'Tue, 01 Jan 1980 1:00:00 GMT');
+	xmlHttp.setRequestHeader('pragma', 'no-cache');
+	xmlHttp.send(null);
+}
+
+
+document.getElementById("start").addEventListener("click",function(){
+	httpGetAsync("/admin/start", function(res) {
+		alert(res);
+	});
+})
+document.getElementById("reset").addEventListener("click",function(){
+	httpGetAsync("/admin/reset", function(res) {
+		alert(res);
+	});
+})
+document.getElementById("pause").addEventListener("click",function(){
+	httpGetAsync("/admin/pause", function(res) {
+		alert(res);
+	});
+})
+document.getElementById("resume").addEventListener("click",function(){
+	httpGetAsync("/admin/resume", function(res) {
+		alert(res);
+	});
+})
+</script>

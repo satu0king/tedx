@@ -1,0 +1,183 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<style>
+
+
+
+
+		.controlls {
+			/* position: absolute; */
+			/* left: 0px; */
+			/* top: 205px; */
+			padding-top: 100px;
+			text-align: center;
+		}
+
+		.display-remain-time {
+			font-family: 'Roboto';
+			font-weight: 100;
+			font-size: 500px;
+			color: green;
+		}
+
+
+		body {
+			background-color: #f7f7f7;
+		}
+	</style>
+</head>
+
+<body>
+
+
+
+		<div class="controlls">
+			<div class="display-remain-time">00:00</div>
+		</div>
+	<!-- </div> -->
+	<script>
+
+
+
+
+		currentState=-1;
+		let intervalTimer;
+		let timeLeft = 0;
+		wholeTime=18*60;
+		// wholeTime = 0.5 * 60; // manage this to set the whole time
+		let isPaused = true;
+		let isStarted = false;
+		const displayOutput = document.querySelector('.display-remain-time')
+		getData()
+
+
+		// update(wholeTime, wholeTime); //refreshes progress bar
+		// displayTimeLeft(wholeTime);
+
+		function changeWholeTime(seconds) {
+			if ((wholeTime + seconds) > 0) {
+				wholeTime += seconds;
+				update(wholeTime, wholeTime);
+			}
+		}
+
+
+		remainTime = 0;
+
+		function httpGetAsync(theUrl, callback) {
+			var xmlHttp = new XMLHttpRequest();
+			xmlHttp.onreadystatechange = function() {
+				if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+					callback(xmlHttp.responseText);
+			}
+			xmlHttp.open("GET", theUrl + '?_=' + new Date().getTime(), true); // true for asynchronous
+			xmlHttp.setRequestHeader('cache-control', 'no-cache, must-revalidate, post-check=0, pre-check=0');
+			xmlHttp.setRequestHeader('cache-control', 'max-age=0');
+			xmlHttp.setRequestHeader('expires', '0');
+			xmlHttp.setRequestHeader('expires', 'Tue, 01 Jan 1980 1:00:00 GMT');
+			xmlHttp.setRequestHeader('pragma', 'no-cache');
+			xmlHttp.send(null);
+		}
+
+		getData();
+		setInterval(getData, 1500)
+
+		function timer(seconds) { //counts time, takes seconds
+			remainTime = Date.now() + (seconds * 1000);
+			isPaused = false;
+			displayTimeLeft(seconds);
+			isStarted=true;
+
+			clearInterval(intervalTimer);
+			intervalTimer = setInterval(function() {
+				timeLeft = Math.round((remainTime - Date.now()) / 1000);
+				if (timeLeft < 0) {
+					clearInterval(intervalTimer);
+					isStarted = false;
+					displayTimeLeft(0);
+					return;
+				}
+				displayTimeLeft(timeLeft);
+			}, 1000);
+		}
+
+		function pauseTimer() {
+			if (isPaused) {
+				timer(timeLeft);
+				isPaused = isPaused ? false : true
+			} else {
+				clearInterval(intervalTimer);
+				isPaused = isPaused ? false : true;
+			}
+		}
+
+		function displayTimeLeft(timeLeft) { //displays time on the input
+			let minutes = Math.floor(timeLeft / 60);
+			let seconds = Math.round(timeLeft % 60);
+			let displayString = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+			displayOutput.textContent = displayString;
+		}
+
+		function getData(){
+			console.log("HIT")
+				httpGetAsync("/admin/timeout", function(res) {
+					res=parseInt(res,10);
+					console.log(res%4)
+					if(res>currentState){
+						currentState=res;
+
+						var state = currentState%4;
+
+						if(state==0){
+							timer(18*60);
+							isPaused=false;
+						}
+						else if(state==1){
+							displayTimeLeft(18*60);
+							remainTime=18*60;
+							isPaused=true;
+							clearInterval(intervalTimer);
+						}
+						else if(state ==2 && !isPaused){
+							console.log("pausing");
+							isPaused=true;
+							clearInterval(intervalTimer);
+							isStarted=true;
+							// pauseTimer();
+						}
+						else if(state ==3 && isPaused){
+							pauseTimer();
+							isPaused=false;
+						}
+						else{
+							console.log("error:",state);
+						}
+
+					}
+				});
+				// httpGetAsync("/wholetime.txt", function(res) {
+				// 	wholeTime = res;
+				// });
+
+		}
+
+		// pauseBtn.addEventListener('click',pauseTimer);
+	</script>
+	<!-- <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-46156385-1', 'cssscript.com');
+  ga('send', 'pageview');
+
+</script> -->
+</body>
+
+</html>
